@@ -25,13 +25,18 @@ class Renderer:
         q = p * np.array([1.0, -1.0]) * self.scale + self.offset
         return float(q[0]), float(q[1])
 
-    def draw(self) -> None:
+    def draw(self, others: tuple[CarEnv, ...] = ()) -> None:
         env, scr = self.env, self.screen
         scr.fill((30, 30, 30))
         for poly in (env.track.outer, env.track.inner):
             pygame.draw.polygon(scr, (200, 200, 200), [self._to_screen(p) for p in poly], 2)
         for gate in env.track.checkpoints:
             pygame.draw.line(scr, (60, 60, 90), self._to_screen(gate[0]), self._to_screen(gate[1]), 1)
+
+        for other in others:
+            color = (90, 50, 50) if other.crashed else (90, 120, 160)
+            for seg in body_segments(other.state, other.car):
+                pygame.draw.line(scr, color, self._to_screen(seg[0]), self._to_screen(seg[1]), 2)
 
         s = env.state
         angles = s.heading + env.config.ray_angles
