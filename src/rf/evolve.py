@@ -10,13 +10,13 @@ import numpy as np
 
 from rf.env import CarEnv
 from rf.policy import MLPPolicy
-from rf.tracks.oval import make_oval
+from rf.tracks import get_track
 
 HIDDEN = 8
 
 
-def make_env() -> CarEnv:
-    return CarEnv(make_oval())
+def make_env(track: str = "oval") -> CarEnv:
+    return CarEnv(get_track(track))
 
 
 def make_policy(env: CarEnv, weights: np.ndarray | None = None) -> MLPPolicy:
@@ -38,10 +38,12 @@ def rollout_fitness(env: CarEnv, weights: np.ndarray) -> float:
 _worker_env: CarEnv | None = None
 
 
-def _evaluate(weights: np.ndarray) -> float:
+def init_worker(track: str) -> None:
     global _worker_env
-    if _worker_env is None:
-        _worker_env = make_env()
+    _worker_env = make_env(track)
+
+
+def _evaluate(weights: np.ndarray) -> float:
     return rollout_fitness(_worker_env, weights)
 
 
@@ -78,14 +80,15 @@ def evolve(
     cfg: GAConfig | None = None,
     workers: int | None = None,
     on_generation: Callable[[int, np.ndarray, np.ndarray], None] | None = None,
+    track: str = "oval",
 ) -> tuple[np.ndarray, np.ndarray]:
     """Run the GA. Returns (final population, its fitness)."""
     cfg = cfg or GAConfig()
     rng = np.random.default_rng(cfg.seed)
-    n = make_policy(make_env()).n_weights
+    n = make_policy(make_env(track)).n_weights
     pop = rng.normal(0.0, cfg.init_sigma, (cfg.pop_size, n))
 
-    with Pool(workers) as pool:
+    with Pool(workers, initializer=init_worker, initargs=(track,)) as pool:
         for gen in range(generations):
             fitness = np.array(pool.map(_evaluate, list(pop)))
             if on_generation:

@@ -18,6 +18,7 @@ class Track:
     checkpoints: np.ndarray  # (K, 2, 2) gates, ordered along driving direction
     start_pos: np.ndarray  # (2,)
     start_heading: float  # radians
+    max_steps: int | None = None  # suggested episode length (about two laps); None = env default
 
     @property
     def walls(self) -> np.ndarray:

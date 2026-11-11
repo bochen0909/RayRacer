@@ -17,7 +17,7 @@ class EnvConfig:
     max_steps: int = 1500
     stall_steps: int = 150  # end the episode if no checkpoint is passed for this long
     ray_angles: np.ndarray = field(default_factory=lambda: DEFAULT_RAY_ANGLES)
-    ray_range: float = 150.0
+    ray_range: float = 300.0
 
 
 class CarEnv:
@@ -26,7 +26,7 @@ class CarEnv:
     def __init__(self, track: Track, car: CarParams | None = None, config: EnvConfig | None = None):
         self.track = track
         self.car = car or CarParams()
-        self.config = config or EnvConfig()
+        self.config = config or EnvConfig(max_steps=track.max_steps or EnvConfig.max_steps)
         self._walls = track.walls
         self.state = CarState()
         self.reset()

@@ -9,11 +9,11 @@ from stable_baselines3.common.vec_env import SubprocVecEnv
 
 from rf.env import CarEnv
 from rf.rl import CarGymEnv
-from rf.tracks.oval import make_oval
+from rf.tracks import get_track, track_names
 
 
-def make() -> CarGymEnv:
-    return CarGymEnv(CarEnv(make_oval()))
+def make(track: str) -> CarGymEnv:
+    return CarGymEnv(CarEnv(get_track(track)))
 
 
 def main() -> None:
@@ -21,15 +21,17 @@ def main() -> None:
     ap.add_argument("--steps", type=int, default=200_000)
     ap.add_argument("--envs", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--track", default="oval", choices=track_names())
     ap.add_argument("--out", type=Path, default=Path("runs"))
     args = ap.parse_args()
-    args.out.mkdir(exist_ok=True)
+    out = args.out / args.track
+    out.mkdir(parents=True, exist_ok=True)
 
-    vec = make_vec_env(make, n_envs=args.envs, seed=args.seed, vec_env_cls=SubprocVecEnv)
+    vec = make_vec_env(make, n_envs=args.envs, seed=args.seed, vec_env_cls=SubprocVecEnv, env_kwargs={"track": args.track})
     model = PPO("MlpPolicy", vec, seed=args.seed, device="cpu", verbose=1)
     model.learn(total_timesteps=args.steps)
-    model.save(args.out / "ppo.zip")
-    print(f"saved to {args.out}/ppo.zip")
+    model.save(out / "ppo.zip")
+    print(f"saved to {out}/ppo.zip")
 
 
 if __name__ == "__main__":

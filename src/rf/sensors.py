@@ -14,7 +14,7 @@ def sense(
     state: CarState,
     walls: np.ndarray,
     ray_angles: np.ndarray = DEFAULT_RAY_ANGLES,
-    max_range: float = 150.0,
+    max_range: float = 300.0,
 ) -> np.ndarray:
     """Normalized distances in [0, 1] (1 = nothing within `max_range`)."""
     d = ray_segment_distances(state.pos, state.heading + ray_angles, walls, max_range)

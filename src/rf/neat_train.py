@@ -35,20 +35,28 @@ class NeatPolicy:
         return float(out[0]), float(out[1])
 
 
-def eval_genome(genome, config) -> float:
+def init_worker(track: str) -> None:
     global _worker_env
-    if _worker_env is None:
-        _worker_env = make_env()
+    _worker_env = make_env(track)
+
+
+def eval_genome(genome, config) -> float:
     return rollout(_worker_env, NeatPolicy(genome, config))
 
 
-def train(generations: int, workers: int | None = None, config_path: Path = DEFAULT_CONFIG, on_generation=None):
+def train(
+    generations: int,
+    workers: int | None = None,
+    config_path: Path = DEFAULT_CONFIG,
+    on_generation=None,
+    track: str = "oval",
+):
     """Returns (best genome, config)."""
     config = load_config(config_path)
     pop = neat.Population(config)
     if on_generation:
         pop.add_reporter(_Reporter(on_generation))
-    with neat.ParallelEvaluator(workers or 4, eval_genome) as evaluator:
+    with neat.ParallelEvaluator(workers or 4, eval_genome, initializer=init_worker, initargs=(track,)) as evaluator:
         best = pop.run(evaluator.evaluate, generations)
     return best, config
 
