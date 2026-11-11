@@ -23,13 +23,16 @@ def make_policy(env: CarEnv, weights: np.ndarray | None = None) -> MLPPolicy:
     return MLPPolicy((env.obs_size, HIDDEN, 2), weights)
 
 
-def rollout_fitness(env: CarEnv, weights: np.ndarray) -> float:
+def rollout(env: CarEnv, policy: Callable[[np.ndarray], tuple[float, float]]) -> float:
     """Checkpoints passed, with a tiny survival bonus to break ties."""
-    policy = make_policy(env, weights)
     obs, done = env.reset(), False
     while not done:
         obs, _, done, _ = env.step(policy(obs))
     return env.checkpoints_passed + 0.1 * env.steps / env.config.max_steps
+
+
+def rollout_fitness(env: CarEnv, weights: np.ndarray) -> float:
+    return rollout(env, make_policy(env, weights))
 
 
 _worker_env: CarEnv | None = None

@@ -5,12 +5,16 @@ Ray-sensor car racing simulation for evolutionary / RL experiments.
 - `src/rf/` — pure NumPy core (geometry, track, car, sensors, env). No pygame import.
 - `src/rf/viz/` — optional pygame rendering.
 - `src/rf/policy.py`, `src/rf/evolve.py` — MLP policy and genetic algorithm.
+- `src/rf/neat_train.py`, `configs/neat.ini` — NEAT version (neat-python), evolves topology too.
 - `scripts/train.py` — headless GA training (saves `runs/best.npy`, `runs/population.npy`).
-- `scripts/watch.py` — drive by hand with arrow keys, or replay `--policy` / `--population`.
+- `scripts/train_neat.py` — headless NEAT training (saves `runs/neat_best.pkl`).
+- `scripts/watch.py` — drive by hand with arrow keys, or replay `--policy` / `--population` / `--neat`.
 
 ```
 uv run pytest
 uv run python scripts/train.py --generations 30
+uv run python scripts/train_neat.py --generations 20
 uv run --extra viz python scripts/watch.py                       # manual driving
 uv run --extra viz python scripts/watch.py --population runs/population.npy
+uv run --extra viz python scripts/watch.py --neat runs/neat_best.pkl
 ```

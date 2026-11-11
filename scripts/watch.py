@@ -3,6 +3,7 @@
   uv run --extra viz python scripts/watch.py                 # drive with arrow keys
   uv run --extra viz python scripts/watch.py --policy runs/best.npy
   uv run --extra viz python scripts/watch.py --population runs/population.npy
+  uv run --extra viz python scripts/watch.py --neat runs/neat_best.pkl
 """
 
 import argparse
@@ -18,6 +19,7 @@ from rf.viz.render import Renderer
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--policy", type=Path)
+    ap.add_argument("--neat", type=Path)
     ap.add_argument("--population", type=Path)
     args = ap.parse_args()
 
@@ -25,9 +27,15 @@ def main() -> None:
     renderer = Renderer(env)
 
     # The first car is the main one (with rays); the rest are drawn dimmed.
-    weights = [np.load(args.policy)] if args.policy else list(np.load(args.population)) if args.population else []
-    envs = [env] + [make_env() for _ in weights[1:]]
-    policies = [make_policy(e, w) for e, w in zip(envs, weights)]
+    if args.neat:
+        from rf.neat_train import load_policy
+
+        policies = [load_policy(args.neat)]
+        envs = [env]
+    else:
+        weights = [np.load(args.policy)] if args.policy else list(np.load(args.population)) if args.population else []
+        envs = [env] + [make_env() for _ in weights[1:]]
+        policies = [make_policy(e, w) for e, w in zip(envs, weights)]
 
     clock = pygame.time.Clock()
     obs = [e.reset() for e in envs]

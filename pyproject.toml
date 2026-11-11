@@ -5,6 +5,7 @@ description = "Ray-sensor car racing simulation for evolutionary / RL experiment
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "neat-python>=2.0.0",
     "numpy>=2.4.6",
 ]
 
