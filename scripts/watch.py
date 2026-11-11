@@ -29,6 +29,16 @@ def main() -> None:
                     help="camera follows the car (default: on for non-oval tracks)")
     args = ap.parse_args()
 
+    # Be forgiving about which flag a model file was passed to: route by extension.
+    for flag in ("policy", "neat", "ppo"):
+        path = getattr(args, flag)
+        if path is not None:
+            kind = {".npy": "policy", ".pkl": "neat", ".zip": "ppo"}.get(path.suffix)
+            if kind is None:
+                ap.error(f"unrecognised model file {path} (expected .npy, .pkl or .zip)")
+            if kind != flag:
+                setattr(args, flag, None)
+                setattr(args, kind, path)
     env = make_env(args.track)
     renderer = Renderer(env, follow=args.track != "oval" if args.follow is None else args.follow)
 
@@ -55,6 +65,8 @@ def main() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                renderer.handle_key(event.key)
         if policies:
             for i, (e, pol) in enumerate(zip(envs, policies)):
                 if not e.done:
@@ -66,9 +78,9 @@ def main() -> None:
             throttle = float(keys[pygame.K_UP]) - float(keys[pygame.K_DOWN])
             env.step((steer, throttle))
             finished = env.done
-        hint = ""
+        hint = "R rays   G gates   M map"
         if not policies:
-            hint = "arrow keys: drive" if pygame.key.get_focused() else "click this window to give it keyboard focus"
+            hint = "arrows: drive   " + hint if pygame.key.get_focused() else "click this window to give it keyboard focus"
         renderer.draw(tuple(envs[1:]), hint)
         if finished:
             pygame.time.wait(500)

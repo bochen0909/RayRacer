@@ -25,6 +25,12 @@ Omit `--track` for the oval. Track centerlines and widths come from
 [TUMFTM/racetrack-database](https://github.com/TUMFTM/racetrack-database) (LGPL-3.0, license copy in
 `src/rf/tracks/data/LICENSE-TUMFTM`). Suzuka is not included because its road crosses itself (overpass).
 
+## Viewer
+
+`watch.py` draws asphalt with sand run-off, kerbs in the corners, a checkered start line, car sprites, tyre
+trails, a speed-sensitive follow camera, a speedometer (mph) and a minimap. Keys: **R** toggles sensor rays,
+**G** checkpoint gates, **M** the minimap; in manual mode use the arrow keys.
+
 ## Car model
 
 Tracks use 3 sim units per metre (`UNITS_PER_METER`), and the HUD shows speed in mph. The car has a top
