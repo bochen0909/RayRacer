@@ -4,6 +4,7 @@
   uv run --extra viz python scripts/watch.py --policy runs/best.npy
   uv run --extra viz python scripts/watch.py --population runs/population.npy
   uv run --extra viz python scripts/watch.py --neat runs/neat_best.pkl
+  uv run --extra viz --extra rl python scripts/watch.py --ppo runs/ppo.zip
 """
 
 import argparse
@@ -20,6 +21,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--policy", type=Path)
     ap.add_argument("--neat", type=Path)
+    ap.add_argument("--ppo", type=Path)
     ap.add_argument("--population", type=Path)
     args = ap.parse_args()
 
@@ -31,6 +33,11 @@ def main() -> None:
         from rf.neat_train import load_policy
 
         policies = [load_policy(args.neat)]
+        envs = [env]
+    elif args.ppo:
+        from rf.rl import load_policy
+
+        policies = [load_policy(args.ppo)]
         envs = [env]
     else:
         weights = [np.load(args.policy)] if args.policy else list(np.load(args.population)) if args.population else []

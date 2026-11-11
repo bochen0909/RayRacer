@@ -13,6 +13,10 @@ dependencies = [
 viz = [
     "pygame>=2.6.1",
 ]
+rl = [
+    "gymnasium>=1.4.0",
+    "stable-baselines3>=2.9.2",
+]
 
 [dependency-groups]
 dev = [
